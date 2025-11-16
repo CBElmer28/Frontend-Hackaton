@@ -1,91 +1,51 @@
-// src/navigation/MainTabs.js
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import React from "react";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { View, Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-// --- Your Screens ---
-import CandidatoScreen from "../screens/CandidatoScreen";
 import HomeScreen from "../screens/HomeScreen";
-import FechasScreen from "../screens/FechasScreen";
-import NoticiasScreen from "../screens/NoticiasScreen";
-import VerificarScreen from "../screens/VerificarScreen";
+import CandidatosScreen from "../screens/CandidatoScreen";
+import DniScreen from "../screens/DniScreen";
+
+const Tab = createMaterialTopTabNavigator();
 
 export default function MainTabs() {
-  const [activeTab, setActiveTab] = useState("Home");
-
-  const screens = {
-    Home: <HomeScreen />,
-    Profile: <CandidatoScreen />,
-    Settings: <FechasScreen />,
-    Noticias: <NoticiasScreen/>,
-    Verificar: <VerificarScreen/>
-    
-  };
-
   return (
-    <View style={styles.container}>
-      {/* Render selected screen */}
-      <View style={styles.screenWrapper}>{screens[activeTab]}</View>
+    <Tab.Navigator
+      initialRouteName="Home"
+      tabBarPosition="bottom"
+      swipeEnabled={true}
+      screenOptions={({ route }) => ({
+        tabBarShowIcon: true,
+        tabBarIndicatorStyle: { backgroundColor: "#007BFF", height: 3 },
+        tabBarStyle: {
+          backgroundColor: "#fff",
+          height: 70,
+          borderTopWidth: 1,
+          borderTopColor: "#eee",
+        },
+        tabBarLabel: ({ focused }) => (
+          <Text style={{ fontSize: 12, color: focused ? "#007BFF" : "#888", top: focused ? -4 : 0 }}>
+            {route.name}
+          </Text>
+        ),
+        tabBarIcon: ({ focused }) => {
+          let iconName;
+          if (route.name === "Home") iconName = "home";
+          else if (route.name === "Candidatos") iconName = "people";
+          else if (route.name === "Validación") iconName = "id-card";
 
-      {/* Bottom Scrollable Tabs */}
-      <View style={styles.tabContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabScroll}
-        >
-          {Object.keys(screens).map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              style={[
-                styles.tabButton,
-                activeTab === tab && styles.activeTabButton,
-              ]}
-              onPress={() => setActiveTab(tab)}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab && styles.activeTabText,
-                ]}
-              >
-                {tab}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-    </View>
+          return (
+            <View style={{ top: focused ? -6 : 0 }}>
+              <Ionicons name={iconName} size={24} color={focused ? "#007BFF" : "#888"} />
+            </View>
+          );
+        },
+      })}
+    >
+      <Tab.Screen name="Candidatos" component={CandidatosScreen} />
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Validación" component={DniScreen} />
+    </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-
-  screenWrapper: { flex: 1 },
-
-  tabContainer: {
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "#f9f9f9",
-  },
-
-  tabScroll: {
-    flexDirection: "row",
-    paddingHorizontal: 10,
-  },
-
-  tabButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    backgroundColor: "#e5e5e5",
-    marginHorizontal: 5,
-  },
-
-  activeTabButton: { backgroundColor: "#007aff" },
-
-  tabText: { fontSize: 16, color: "#333" },
-
-  activeTabText: { color: "#fff", fontWeight: "600" },
-});
