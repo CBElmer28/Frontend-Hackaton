@@ -14,6 +14,14 @@ export default function MainTabs({ navigation, route }) {
 
   // role can be 'elector', 'member' or undefined
   const role = route?.params?.role ?? null;
+  
+  // If a specific tab is requested via route params, switch to it
+  const requestedTab = route?.params?.activeTab;
+  React.useEffect(() => {
+    if (requestedTab && Object.keys(screens).includes(requestedTab)) {
+      setActiveTab(requestedTab);
+    }
+  }, [requestedTab]);
 
   const colors = {
     redPrimary: '#D70000',
@@ -55,7 +63,7 @@ export default function MainTabs({ navigation, route }) {
 
   // Base screens visible to everyone
   const screens = {
-    Home: <HomeScreen />,
+    Home: <HomeScreen navigation={navigation} onTabSwitch={setActiveTab} />,
     Candidatos: <ElectorCandidatosScreen />,
     Calendarios: <SharedCalendarioScreen />,
     Partidos: <SharedPartidosScreen/>,
