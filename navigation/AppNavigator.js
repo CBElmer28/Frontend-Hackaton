@@ -3,7 +3,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import SplashScreen from "../screens/SplashScreen";
-import MainTabs from "./MainTabs";  // Aquí está tu menú
+import MainTabs from "./MainTabs";
+import VerificarScreen from "../screens/VerificarScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -11,13 +12,9 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-
-        {/* 1. Pantalla inicial */}
         <Stack.Screen name="Splash" component={SplashScreen} />
-
-        {/* 2. Menú principal con tabs */}
         <Stack.Screen name="MainTabs" component={MainTabs} />
-
+        <Stack.Screen name="VerificarScreen" component={VerificarScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
