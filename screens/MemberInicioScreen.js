@@ -1,54 +1,68 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import LogoutButton from "../components/LogoutButton";
+import { Ionicons } from "@expo/vector-icons";
 
 const colors = {
-    redPrimary: '#D70000',
-    blueSecondary: '#1C3E6C',
-    grayText: '#444444',
-    white: '#FFFFFF',
-    grayBackground: '#F0F2F5',
+  redPrimary: '#D70000',
+  blueSecondary: '#1C3E6C',
+  grayText: '#444444',
+  white: '#FFFFFF',
+  grayBackground: '#F0F2F5',
 };
 
-export default function MemberInicioScreen({navigation}) {
+export default function MemberInicioScreen({ navigation }) {
+
   const name = "Ana Laura Chávez Pérez";
-  
+
   return (
     <View style={{ flex: 1, position: "relative" }}>
       <LogoutButton navigation={navigation} />
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>¡Bienvenido(a), {name}!</Text>
-        <Text style={styles.subtitle}>Tu rol es vital para la democracia.</Text>
-      </View>
 
-      {/* Tarjeta de Estado de Asignación */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Estado de tu Asignación</Text>
-        <Text style={styles.statusText}>✅ DESIGNADO(A) - PRESIDENTE DE MESA</Text>
-        <Text style={styles.infoText}>
-          Consulta la pestaña **Asignación** para ver tu local, aula y la hora exacta de presentación.
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>¡Bienvenido(a), {name}!</Text>
+          <Text style={styles.subtitle}>Tu rol es vital para la democracia.</Text>
+        </View>
+
+        {/* Tarjeta de Estado */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Estado de tu Asignación</Text>
+
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
+            <Ionicons name="checkmark-circle" size={20} color="green" style={{ marginRight: 6 }} />
+            <Text style={styles.statusText}>DESIGNADO(A) - PRESIDENTE DE MESA</Text>
+          </View>
+
+          <Text style={styles.infoText}>
+            Consulta la pestaña Asignación para ver tu local, aula y la hora exacta de presentación.
+          </Text>
+        </View>
+
+        {/* Recordatorios Rápidos */}
+        <View style={styles.quickInfoCard}>
+          <Text style={styles.quickInfoTitle}>Recordatorios Clave (Día E)</Text>
+
+          <View style={styles.bullet}>
+            <Ionicons name="time-outline" size={18} color={colors.grayText} />
+            <Text style={styles.bulletText}>Hora de Presentación: 7:00 AM (puntualidad obligatoria).</Text>
+          </View>
+
+          <View style={styles.bullet}>
+            <Ionicons name="id-card-outline" size={18} color={colors.grayText} />
+            <Text style={styles.bulletText}>Documento a presentar: DNI original.</Text>
+          </View>
+
+          <View style={styles.bullet}>
+            <Ionicons name="book-outline" size={18} color={colors.grayText} />
+            <Text style={styles.bulletText}>Revisa tus Deberes para dominar el proceso.</Text>
+          </View>
+        </View>
+
+        <Text style={styles.footerText}>
+          Tu compromiso garantiza un proceso transparente y ordenado.
         </Text>
-      </View>
-
-      {/* Recordatorios Rápidos */}
-      <View style={styles.quickInfoCard}>
-        <Text style={styles.quickInfoTitle}>Recordatorios Clave (Día E)</Text>
-        <View style={styles.bullet}>
-          <Text style={styles.bulletText}>• Hora de Presentación: 7:00 AM (puntualidad obligatoria).</Text>
-        </View>
-        <View style={styles.bullet}>
-          <Text style={styles.bulletText}>• Documento a presentar: DNI original.</Text>
-        </View>
-        <View style={styles.bullet}>
-          <Text style={styles.bulletText}>• Revisa tus Deberes para dominar el proceso de Instalación y Escrutinio.</Text>
-        </View>
-      </View>
-
-      <Text style={styles.footerText}>
-        Tu compromiso garantiza un proceso transparente y ordenado.
-      </Text>
-    </ScrollView>
+      </ScrollView>
     </View>
   );
 }
@@ -96,7 +110,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: 'green',
-    marginBottom: 10,
   },
   infoText: {
     fontSize: 14,
@@ -122,12 +135,13 @@ const styles = StyleSheet.create({
   bullet: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   bulletText: {
     fontSize: 14,
     color: colors.grayText,
-    marginLeft: 5,
+    marginLeft: 6,
+    flex: 1,
   },
   footerText: {
     fontSize: 12,

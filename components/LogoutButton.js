@@ -1,9 +1,15 @@
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet, Alert } from "react-native";
+import { TouchableOpacity, Alert, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function LogoutButton({ navigation }) {
 
   const handleLogout = () => {
+    if (!navigation) {
+      console.warn("LogoutButton: navigation is undefined.");
+      return;
+    }
+
     Alert.alert(
       "Cerrar sesión",
       "¿Seguro que quieres cerrar sesión?",
@@ -19,7 +25,7 @@ export default function LogoutButton({ navigation }) {
 
   return (
     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-      <Text style={styles.logoutText}>🚪</Text>
+      <Ionicons name="log-out-outline" size={24} color="#D70000" />
     </TouchableOpacity>
   );
 }
@@ -35,8 +41,5 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     elevation: 5,
     zIndex: 9999,
-  },
-  logoutText: {
-    fontSize: 20,
   },
 });
