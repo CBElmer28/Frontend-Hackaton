@@ -6,7 +6,7 @@ Este repositorio contiene el frontend de la Plataforma de Información Electoral
 
 -----
 
-## 🎯 Propósito y Alcance
+## Propósito y Alcance
 
 Esta aplicación móvil sirve como una plataforma centralizada para la participación electoral. Está diseñada para dos roles principales:
 
@@ -17,7 +17,7 @@ Este documento cubre la arquitectura fundamental, las tecnologías seleccionadas
 
 -----
 
-## 📱 Identidad y Plataforma
+## Identidad y Plataforma
 
 La aplicación se identifica como **"Frontend-Hackaton"** en la configuración de Expo (slug: `Frontend-Hackaton`, versión: `1.0.0`). Está construida usando el flujo administrado de Expo (`~54.0.23`) sobre React Native `0.81.5` y React `19.1.0`.
 
@@ -56,7 +56,7 @@ La aplicación utiliza un conjunto seleccionado de dependencias organizadas por 
 
 -----
 
-## 🗺️ Flujo y Arquitectura
+## Flujo y Arquitectura
 
 ### Flujo de Entrada de la Aplicación
 
@@ -147,7 +147,7 @@ Cada pantalla que consume datos sigue un patrón estandarizado:
 
 -----
 
-## 🖥️ Pantallas Clave
+## Pantallas Clave
 
 La aplicación contiene múltiples pantallas organizadas por rol y propósito.
 
@@ -179,7 +179,7 @@ La aplicación contiene múltiples pantallas organizadas por rol y propósito.
 
 -----
 
-## 🚀 Comandos de Desarrollo
+## Comandos de Desarrollo
 
 El proyecto utiliza los comandos estándar de Expo definidos en `package.json`:
 
