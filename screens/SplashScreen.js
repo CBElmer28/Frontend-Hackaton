@@ -1,9 +1,20 @@
-import React, { useEffect } from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+// SplashScreen.js
+import React, { useEffect, useRef } from "react";
+import { View, Text, ActivityIndicator, StyleSheet, Animated } from "react-native";
 
 export default function SplashScreen({ navigation }) {
+  const pulse = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
+    // Animación de pulso para el logo
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1.05, duration: 600, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.95, duration: 600, useNativeDriver: true }),
+      ])
+    ).start();
+
+    // Navegar al ScrollableBottomTabs después de 1.5s
     const timer = setTimeout(() => {
       navigation.replace("MainTabs");
     }, 1500);
@@ -13,8 +24,10 @@ export default function SplashScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>⚪ TituloDelApp</Text>
-      <ActivityIndicator size="large" color="#000" />
+      <Animated.Text style={[styles.logo, { transform: [{ scale: pulse }] }]}>
+        ⚪ TituloDelApp
+      </Animated.Text>
+      <ActivityIndicator size="large" color="#007BFF" />
     </View>
   );
 }
@@ -30,5 +43,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     marginBottom: 20,
+    color: "#007BFF",
   },
 });
