@@ -1,5 +1,6 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const colors = {
     redPrimary: '#D70000',
@@ -10,58 +11,51 @@ const colors = {
     dark: '#333333'
 };
 
-// **********************************************
-// DATOS ESTÁTICOS DE CANDIDATOS PRESIDENCIALES
-// **********************************************
-const presidentialCandidates = [
-    { party: "Fuerza Popular", leader: "Keiko Fujimori", color: '#FF9800' },
-    { party: "Perú Libre", leader: "Vladimir Cerrón", color: '#C00000' },
-    { party: "Alianza para el Progreso", leader: "César Acuña", color: '#2196F3' },
-    { party: "Acción Popular", leader: "Alfredo Barnechea", color: '#4CAF50' },
-    { party: "Avanza País", leader: "Hernando de Soto", color: '#FF5722' }
-];
+const API_URL = 'https://backend-hackaton-seven.vercel.app';
 
 export default function SharedPartidosScreen() {
-    
-    const viewDetails = (leader) => {
-        Alert.alert(
-            `Propuestas de ${leader}`,
-            `Simulación LLM: Se buscaría en línea las 3 propuestas clave del candidato ${leader} (Economía, Salud, Seguridad) y noticias recientes, citando fuentes.`,
-            [{ text: "OK" }]
-        );
-    };
+    const navigation = useNavigation();
+    const [partidos, setPartidos] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        let active = true;
+        setLoading(true);
+        fetch(`${API_URL}/partidos`)
+            .then(r => r.json())
+            .then(json => {
+                if (!active) return;
+                if (json?.ok) setPartidos(json.data || []);
+                else setError("Error cargando partidos");
+            })
+            .catch(() => setError("No se pudo conectar con el backend"))
+            .finally(() => setLoading(false));
+        return () => { active = false; };
+    }, []);
 
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.screenTitle}>Planchas Presidenciales 2026</Text>
-            
-            <Text style={styles.instructionText}>
-                Información sobre los planes de gobierno y las hojas de vida (HdV) de los candidatos, obtenida de Infogob (simulado).
-            </Text>
+            <Text style={styles.screenTitle}>Partidos</Text>
+            {loading && <ActivityIndicator color={colors.redPrimary} style={{ marginBottom: 10 }} />}
+            {error ? <Text style={styles.instructionText}>{error}</Text> : null}
 
-            {/* Listado de Planchas */}
-            {presidentialCandidates.map((candidate, index) => (
-                <View key={index} style={[styles.candidateCard, { borderLeftColor: candidate.color }]}>
-                    <Text style={styles.partyName}>{candidate.party}</Text>
-                    <Text style={styles.leaderName}>Candidato: {candidate.leader}</Text>
-                    
-                    <TouchableOpacity 
+            {partidos.map((p) => (
+                <TouchableOpacity
+                    key={p.id}
+                    style={[styles.candidateCard, { borderLeftColor: colors.blueSecondary }]}
+                    onPress={() => navigation.navigate('PartidoDetalle', { id: p.id, nombre: p.nombre })}
+                >
+                    <Text style={styles.partyName}>{p.nombre}</Text>
+                    <Text style={styles.leaderName}>{p.acronimo || ''}</Text>
+                    <TouchableOpacity
                         style={[styles.buttonDetails, { backgroundColor: colors.blueSecondary }]}
-                        onPress={() => viewDetails(candidate.leader)}
+                        onPress={() => navigation.navigate('PartidoDetalle', { id: p.id, nombre: p.nombre })}
                     >
-                        <Text style={styles.buttonText}>Ver Propuestas y Noticias 🔍</Text>
+                        <Text style={styles.buttonText}>Ver detalle</Text>
                     </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
             ))}
-
-            {/* Bloque de Información sobre otros cargos */}
-            <Text style={styles.subHeader}>Candidatos al Congreso y Andino</Text>
-            <View style={styles.infoBox}>
-                <Text style={styles.infoText}>
-                    La información detallada por distrito electoral y las hojas de vida de los candidatos al Congreso y Parlamento Andino se encuentra en la pestaña **Candidatos**, donde podrás filtrar por cargo.
-                </Text>
-            </View>
-
         </ScrollView>
     );
 }
