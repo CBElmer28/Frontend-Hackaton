@@ -6,6 +6,7 @@ import ElectorInicioScreen from "../screens/ElectorInicioScreen"; // Panel Perso
 import ElectorCandidatosScreen from "../screens/ElectorCandidatosScreen"; // Búsqueda por Cargo (Filtros)
 import SharedCalendarioScreen from "../screens/SharedCalendarioScreen"; // Calendario (Compartido)
 import SharedPartidosScreen from "../screens/SharedPartidosScreen"; // Partidos (Lista Presidencial)
+import HomeScreen from "../screens/HomeScreen";
 
 // Paleta de colores institucional
 const colors = {
@@ -48,7 +49,7 @@ const getTabIcon = (tab, isActive) => {
     );
 };
 
-export default function ElectorTabs() {
+export default function ElectorTabs({ navigation }) {
   // Estado para la pestaña activa, inicia en "Mi Voto"
   const [activeTab, setActiveTab] = useState("Mi Voto");
 
@@ -58,6 +59,7 @@ export default function ElectorTabs() {
     "Candidatos": <ElectorCandidatosScreen />, // Búsqueda avanzada por cargo con filtros
     "Partidos": <SharedPartidosScreen />, // Lista de Planchas Presidenciales y planes
     "Calendario": <SharedCalendarioScreen />, // Fechas importantes
+    "Cerrar Sesión": <HomeScreen />, // Placeholder — pressing this will trigger logout
   };
 
   return (
@@ -72,7 +74,14 @@ export default function ElectorTabs() {
           <TouchableOpacity
             key={tab}
             style={[styles.tab, activeTab === tab && styles.activeTab]}
-            onPress={() => setActiveTab(tab)}
+            onPress={() => {
+              if (tab === 'Cerrar Sesión') {
+                // Replace the current stack with MainTabs to simulate logout
+                navigation.replace('MainTabs');
+                return;
+              }
+              setActiveTab(tab);
+            }}
           >
             {getTabIcon(tab, activeTab === tab)}
           </TouchableOpacity>
