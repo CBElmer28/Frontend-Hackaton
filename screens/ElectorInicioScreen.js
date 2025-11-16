@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from "react-native";
+import LogoutButton from "../components/LogoutButton";
 
 // Paleta de colores institucional
 const colors = {
@@ -23,7 +24,7 @@ const electorData = {
     lon: -77.05, 
 };
 
-export default function ElectorInicioScreen() {
+export default function ElectorInicioScreen({navigation}) {
     const userName = electorData.name; 
 
     const openMaps = () => {
@@ -33,6 +34,8 @@ export default function ElectorInicioScreen() {
     };
 
     return (
+        <View style={{ flex: 1, position: "relative" }}>
+            <LogoutButton navigation={navigation} />
         <ScrollView style={styles.container}>
             <Text style={styles.welcome}>¡Bienvenido(a), {userName}!</Text>
             <Text style={styles.introText}>Aquí está la información clave para ejercer tu voto:</Text>
@@ -65,6 +68,7 @@ export default function ElectorInicioScreen() {
             </Text>
 
         </ScrollView>
+        </View>
     );
 }
 

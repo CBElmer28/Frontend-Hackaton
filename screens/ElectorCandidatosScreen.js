@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const colors = {
     redPrimary: '#D70000',
@@ -17,98 +18,89 @@ const institutionalPositions = [
     "Parlamento Andino"
 ];
 
-const mockParties = [
-    { name: "Fuerza Popular", leader: "K. Fujimori", color: '#FF9800' },
-    { name: "Perú Libre", leader: "V. Cerrón", color: '#C00000' },
-    { name: "Alianza para el Progreso", leader: "C. Acuña", color: '#2196F3' },
-    { name: "Somos Perú", leader: "P. García", color: '#6A1B9A' },
-    { name: "Acción Popular", leader: "A. Belaunde", color: '#4CAF50' },
-];
+const API_URL = 'https://backend-hackaton-bice.vercel.app';
 
 
 export default function ElectorCandidatosScreen() {
-    const [selectedPosition, setSelectedPosition] = useState(institutionalPositions[0]);
+    const navigation = useNavigation();
     const [searchQuery, setSearchQuery] = useState("");
-    const [filteredParties, setFilteredParties] = useState(mockParties);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [candidatos, setCandidatos] = useState([]);
 
-    const handleSearch = () => {
-        if (searchQuery.trim() === "") {
-            setFilteredParties(mockParties);
-        } else {
-            const results = mockParties.filter(party => 
-                party.name.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-            setFilteredParties(results);
-        }
-    };
-    
-    const viewProposals = (partyName) => {
-        Alert.alert(
-            `Analizando Propuestas`,
-            `Simulación LLM: Se iniciará la búsqueda en línea de las 3 propuestas clave del partido "${partyName}" para el cargo de ${selectedPosition}.`,
-            [{ text: "OK" }]
+    useEffect(() => {
+        let active = true;
+        setLoading(true);
+        fetch(`${API_URL}/candidatos`)
+            .then(r => r.json())
+            .then(json => {
+                if (!active) return;
+                if (json?.ok) setCandidatos(json.data || []);
+                else setError("Error cargando candidatos");
+            })
+            .catch(() => setError("No se pudo conectar con el backend"))
+            .finally(() => setLoading(false));
+        return () => { active = false; };
+    }, []);
+
+    const partidos = useMemo(() => {
+        const set = new Set();
+        candidatos.forEach(c => { if (c.partido_nombre) set.add(c.partido_nombre); });
+        return Array.from(set).sort();
+    }, [candidatos]);
+
+    const filtrados = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) return candidatos;
+        return candidatos.filter(c =>
+            (c.nombre_completo || '').toLowerCase().includes(q) ||
+            (c.partido_nombre || '').toLowerCase().includes(q)
         );
-    };
+    }, [candidatos, searchQuery]);
 
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.screenTitle}>Voto Informado: Búsqueda por Cargo</Text>
+            <Text style={styles.screenTitle}>Candidatos</Text>
 
-            <Text style={styles.label}>Seleccione el Cargo a Analizar:</Text>
-            <View style={styles.positionSelector}>
-                {institutionalPositions.map((pos, index) => (
-                    <TouchableOpacity
-                        key={index}
-                        style={[styles.positionButton, selectedPosition === pos && styles.activePositionButton]}
-                        onPress={() => {
-                            setSelectedPosition(pos);
-                            setSearchQuery("");
-                            setFilteredParties(mockParties); 
-                        }}
-                    >
-                        <Text style={[styles.positionText, selectedPosition === pos && styles.activePositionText]}>
-                            {pos.split('(')[0].trim()}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
-
-            {/* Búsqueda por Partido (Filtro) */}
-            <Text style={styles.label}>Buscar por Nombre de Partido:</Text>
+            <Text style={styles.label}>Buscar por nombre o partido</Text>
             <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Escriba el nombre del partido..."
+                    placeholder="Escriba nombre de candidato o partido..."
                     keyboardType="default"
                     value={searchQuery}
                     onChangeText={setSearchQuery}
-                    onSubmitEditing={handleSearch}
                 />
-                <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-                    <Text style={styles.searchButtonText}>🔍</Text>
-                </TouchableOpacity>
+                <View style={styles.searchButton}><Text style={styles.searchButtonText}>🔍</Text></View>
             </View>
-            <Text style={styles.currentPosition}>
-                Candidatos (Lista simulada) para: <Text style={{fontWeight: 'bold', color: colors.redPrimary}}>{selectedPosition}</Text>
-            </Text>
 
-            {/* Resultados de Partidos */}
+            {loading && <ActivityIndicator color={colors.redPrimary} style={{ marginTop: 10 }} />}
+            {error ? <Text style={styles.noResults}>{error}</Text> : null}
+
+            <Text style={styles.currentPosition}>Partidos: {partidos.join(', ')}</Text>
+
             <View style={styles.resultsContainer}>
-                {filteredParties.length > 0 ? (
-                    filteredParties.map((party, index) => (
-                        <View key={index} style={[styles.partyResultCard, { borderLeftColor: party.color }]}>
-                            <Text style={styles.partyName}>{party.name}</Text>
-                            <Text style={styles.leader}>Líder Principal: {party.leader}</Text>
-                            <TouchableOpacity style={styles.proposalsButton} onPress={() => viewProposals(party.name)}>
-                                <Text style={styles.proposalsButtonText}>Ver Propuestas (LLM)</Text>
+                {filtrados.length > 0 ? (
+                    filtrados.map((c) => (
+                        <TouchableOpacity
+                            key={c.id}
+                            style={[styles.partyResultCard, { borderLeftColor: colors.blueSecondary }]}
+                            onPress={() => navigation.navigate('CandidatoDetalle', { id: c.id, nombre: c.nombre_completo })}
+                        >
+                            <Text style={styles.partyName}>{c.nombre_completo}</Text>
+                            <Text style={styles.leader}>Partido: {c.partido_nombre || '—'}</Text>
+                            <TouchableOpacity
+                                style={styles.proposalsButton}
+                                onPress={() => navigation.navigate('CandidatoDetalle', { id: c.id, nombre: c.nombre_completo })}
+                            >
+                                <Text style={styles.proposalsButtonText}>Ver perfil</Text>
                             </TouchableOpacity>
-                        </View>
+                        </TouchableOpacity>
                     ))
                 ) : (
-                    <Text style={styles.noResults}>No se encontraron partidos que coincidan con la búsqueda.</Text>
+                    <Text style={styles.noResults}>No se encontraron resultados.</Text>
                 )}
             </View>
-
         </ScrollView>
     );
 }
