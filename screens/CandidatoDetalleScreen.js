@@ -9,7 +9,7 @@ const colors = {
   grayBackground: '#F0F2F5'
 };
 
-const API_URL = 'https://backend-hackaton-seven.vercel.app';
+const API_URL = 'https://backend-hackaton-bice.vercel.app';
 
 export default function CandidatoDetalleScreen({ route }) {
   const { id, nombre } = route.params || {};

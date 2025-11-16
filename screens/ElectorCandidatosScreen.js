@@ -18,7 +18,7 @@ const institutionalPositions = [
     "Parlamento Andino"
 ];
 
-const API_URL = 'https://backend-hackaton-seven.vercel.app';
+const API_URL = 'https://backend-hackaton-bice.vercel.app';
 
 
 export default function ElectorCandidatosScreen() {
