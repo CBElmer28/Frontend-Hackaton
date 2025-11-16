@@ -1,5 +1,5 @@
 // src/navigation/MainTabs.js
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Alert,
   Dimensions,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 // --- Your Screens ---
 import ElectorCandidatosScreen from "../screens/ElectorCandidatosScreen";
@@ -20,12 +21,11 @@ import VerificarScreen from "../screens/VerificarScreen";
 const screenWidth = Dimensions.get("window").width;
 
 export default function MainTabs({ navigation, route }) {
-  const [activeTab, setActiveTab] = useState("Home");
+  const [activeTab, setActiveTab] = useState("Inicio");
   const scrollRef = useRef(null);
 
   const role = route?.params?.role ?? null;
-  
-  // (requestedTab handling moved later, after allScreens/allKeys are defined)
+  const datos = route?.params?.datos ?? null;
 
   const colors = {
     redPrimary: "#D70000",
@@ -36,25 +36,27 @@ export default function MainTabs({ navigation, route }) {
   };
 
   const getTabIcon = (tab, isActive) => {
-    const emojiMap = {
-      Home: "🏠",
-      Candidatos: "🔍",
-      Calendarios: "🗓️",
-      Partidos: "🏛️",
-      Verificar: "✅",
-      "Mi Voto": "🗳️",
-      "Inicio Miembro": "👤",
-      Asignación: "📋",
-      "Calendario Miembro": "📆",
-      Deberes: "🧭",
-      "Cerrar Sesión": "🚪",
+    const iconMap = {
+      Inicio: "home",
+      Candidatos: "search",
+      Calendarios: "calendar",
+      Partidos: "business",
+      Verificar: "checkmark-circle",
+      "Mi Voto": "ballot",
+      "Inicio Miembro": "person",
+      Asignación: "clipboard",
+      "Calendario Miembro": "calendar-outline",
+      Deberes: "compass",
+      "Cerrar Sesión": "log-out",
     };
 
     return (
       <View style={{ alignItems: "center", justifyContent: "center" }}>
-        <Text style={[isActive ? styles.activeIcon : styles.icon]}>
-          {emojiMap[tab] || "❓"}
-        </Text>
+        <Ionicons
+          name={iconMap[tab] || "help-circle"}
+          size={22}
+          color={isActive ? colors.white : colors.dark}
+        />
         <Text
           style={[
             isActive ? styles.activeLabelText : styles.labelText,
@@ -68,16 +70,16 @@ export default function MainTabs({ navigation, route }) {
   };
 
   const screens = {
-  Home: (
-  <HomeScreen
-    navigation={navigation}
-    onTabSwitch={(tabName) => {
-      const index = tabKeys.indexOf(tabName);
-      if (index !== -1) scrollToTab(index);
-    }}
-  />
-),
-};
+    Inicio: (
+      <HomeScreen
+        navigation={navigation}
+        onTabSwitch={(tabName) => {
+          const index = tabKeys.indexOf(tabName);
+          if (index !== -1) scrollToTab(index);
+        }}
+      />
+    ),
+  };
 
   if (role === "elector") {
     const ElectorInicioScreen = require("../screens/ElectorInicioScreen").default;
@@ -96,10 +98,6 @@ export default function MainTabs({ navigation, route }) {
     screens["Deberes"] = <MemberDeberesScreen />;
   }
 
-  let tabKeys = Object.keys(screens);
-
-  // Build a full screens collection (allScreens) so hidden routes remain navigable
-  // while we render a curated set of bottom tabs to avoid visual overload.
   const allScreens = {
     ...screens,
     Candidatos: <ElectorCandidatosScreen />,
@@ -108,70 +106,50 @@ export default function MainTabs({ navigation, route }) {
     Verificar: <VerificarScreen navigation={navigation} />,
   };
 
-  if (role === "elector") {
-    const ElectorInicioScreen = require("../screens/ElectorInicioScreen").default;
-    allScreens["Mi Voto"] = <ElectorInicioScreen />;
-  }
-
-  if (role === "member") {
-    const MemberInicioScreen = require("../screens/MemberInicioScreen").default;
-    const MemberAsignacionScreen = require("../screens/MemberAsignacionScreen").default;
-    const MemberCalendarioScreen = require("../screens/MemberCalendarioScreen").default;
-    const MemberDeberesScreen = require("../screens/MemberDeberesScreen").default;
-
-    allScreens["Inicio Miembro"] = <MemberInicioScreen />;
-    allScreens["Asignación"] = <MemberAsignacionScreen />;
-    allScreens["Calendario Miembro"] = <MemberCalendarioScreen />;
-    allScreens["Deberes"] = <MemberDeberesScreen />;
-  }
-
   const allKeys = Object.keys(allScreens);
-  // Use allKeys for the paging ScrollView; bottom tabs will be a filtered view
-  tabKeys = allKeys;
-  const activeIndex = tabKeys.indexOf(activeTab);
+  const activeIndex = allKeys.indexOf(activeTab);
 
   const handleScroll = (event) => {
-  const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
-  const nextTab = tabKeys[index];
+    const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
+    const nextTab = allKeys[index];
 
-  if (nextTab === "Cerrar Sesión") {
-    // Evita actualizar el estado para no provocar doble render
-    Alert.alert("Cerrar sesión", "¿Desea cerrar sesión?", [
-      {
-        text: "Cancelar",
-        style: "cancel",
-        onPress: () => scrollToTab(activeIndex), // vuelve al tab anterior
-      },
-      {
-        text: "Sí",
-        onPress: () => navigation.replace("MainTabs"),
-      },
-    ]);
-  } else {
-    // Solo actualiza si no es "Cerrar Sesión"
-    if (nextTab !== activeTab) {
-      setActiveTab(nextTab);
+    if (nextTab === "Cerrar Sesión") {
+      Alert.alert("Cerrar sesión", "¿Desea cerrar sesión?", [
+        {
+          text: "Cancelar",
+          style: "cancel",
+          onPress: () => scrollToTab(activeIndex),
+        },
+        {
+          text: "Sí",
+          onPress: () => navigation.replace("MainTabs"),
+        },
+      ]);
+    } else {
+      if (nextTab !== activeTab) {
+        setActiveTab(nextTab);
+      }
     }
-  }
-};
+  };
 
   const scrollToTab = (index) => {
     scrollRef.current?.scrollTo({ x: index * screenWidth, animated: true });
     setActiveTab(allKeys[index]);
   };
 
-  // If a specific tab is requested via route params, switch to it
-  React.useEffect(() => {
+  useEffect(() => {
     const requestedTab = route?.params?.activeTab;
     if (requestedTab && allKeys.includes(requestedTab)) {
       const idx = allKeys.indexOf(requestedTab);
       scrollToTab(idx);
+    } else if (!datos) {
+      const idx = allKeys.indexOf("Inicio");
+      if (idx !== -1) scrollToTab(idx);
     }
   }, [route?.params?.activeTab]);
 
   return (
     <View style={styles.container}>
-      {/* Scrollable screens */}
       <ScrollView
         horizontal
         pagingEnabled
@@ -187,7 +165,6 @@ export default function MainTabs({ navigation, route }) {
         ))}
       </ScrollView>
 
-      {/* Bottom Tabs */}
       <View style={styles.tabContainer}>
         <ScrollView
           horizontal
@@ -248,8 +225,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginHorizontal: 5,
   },
-  icon: { fontSize: 20 },
-  activeIcon: { fontSize: 22 },
   labelText: { fontSize: 12 },
   activeLabelText: { fontSize: 12, fontWeight: "bold" },
 });
