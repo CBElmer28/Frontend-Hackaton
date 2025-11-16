@@ -9,6 +9,7 @@ import {
   Alert,
   Dimensions,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 // --- Your Screens ---
 import ElectorCandidatosScreen from "../screens/ElectorCandidatosScreen";
@@ -20,7 +21,7 @@ import VerificarScreen from "../screens/VerificarScreen";
 const screenWidth = Dimensions.get("window").width;
 
 export default function MainTabs({ navigation, route }) {
-  const [activeTab, setActiveTab] = useState("Home");
+  const [activeTab, setActiveTab] = useState("Inicio");
   const scrollRef = useRef(null);
 
   const role = route?.params?.role ?? null;
@@ -36,25 +37,27 @@ export default function MainTabs({ navigation, route }) {
   };
 
   const getTabIcon = (tab, isActive) => {
-    const emojiMap = {
-      Home: "🏠",
-      Candidatos: "🔍",
-      Calendarios: "🗓️",
-      Partidos: "🏛️",
-      Verificar: "✅",
-      "Mi Voto": "🗳️",
-      "Inicio Miembro": "👤",
-      Asignación: "📋",
-      "Calendario Miembro": "📆",
-      Deberes: "🧭",
-      "Cerrar Sesión": "🚪",
+    const iconMap = {
+      Inicio: "home",
+      Candidatos: "search",
+      Calendarios: "calendar",
+      Partidos: "business",
+      Verificar: "checkmark-circle",
+      "Mi Voto": "document-text-outline",
+      "Inicio Miembro": "person",
+      Asignación: "clipboard",
+      "Calendario Miembro": "calendar-outline",
+      Deberes: "compass",
+      "Cerrar Sesión": "log-out",
     };
 
     return (
       <View style={{ alignItems: "center", justifyContent: "center" }}>
-        <Text style={[isActive ? styles.activeIcon : styles.icon]}>
-          {emojiMap[tab] || "❓"}
-        </Text>
+        <Ionicons
+          name={iconMap[tab] || "help-circle"}
+          size={22}
+          color={isActive ? colors.white : colors.dark}
+        />
         <Text
           style={[
             isActive ? styles.activeLabelText : styles.labelText,
@@ -68,7 +71,7 @@ export default function MainTabs({ navigation, route }) {
   };
 
   const screens = {
-  Home: (
+  Inicio: (
   <HomeScreen
     navigation={navigation}
     onTabSwitch={(tabName) => {
@@ -248,8 +251,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginHorizontal: 5,
   },
-  icon: { fontSize: 20 },
-  activeIcon: { fontSize: 22 },
   labelText: { fontSize: 12 },
   activeLabelText: { fontSize: 12, fontWeight: "bold" },
 });
