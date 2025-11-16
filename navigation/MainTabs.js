@@ -25,13 +25,7 @@ export default function MainTabs({ navigation, route }) {
 
   const role = route?.params?.role ?? null;
   
-  // If a specific tab is requested via route params, switch to it
-  const requestedTab = route?.params?.activeTab;
-  React.useEffect(() => {
-    if (requestedTab && Object.keys(screens).includes(requestedTab)) {
-      setActiveTab(requestedTab);
-    }
-  }, [requestedTab]);
+  // (requestedTab handling moved later, after allScreens/allKeys are defined)
 
   const colors = {
     redPrimary: "#D70000",
@@ -74,17 +68,20 @@ export default function MainTabs({ navigation, route }) {
   };
 
   const screens = {
-    Home: <HomeScreen navigation={navigation} onTabSwitch={setActiveTab} />,
-    Candidatos: <ElectorCandidatosScreen />,
-    Calendarios: <SharedCalendarioScreen />,
-    Partidos: <SharedPartidosScreen />,
-    Verificar: <VerificarScreen navigation={navigation} />,
-  };
+  Home: (
+  <HomeScreen
+    navigation={navigation}
+    onTabSwitch={(tabName) => {
+      const index = tabKeys.indexOf(tabName);
+      if (index !== -1) scrollToTab(index);
+    }}
+  />
+),
+};
 
   if (role === "elector") {
     const ElectorInicioScreen = require("../screens/ElectorInicioScreen").default;
     screens["Mi Voto"] = <ElectorInicioScreen />;
-    screens["Cerrar Sesión"] = <HomeScreen />;
   }
 
   if (role === "member") {
@@ -97,10 +94,40 @@ export default function MainTabs({ navigation, route }) {
     screens["Asignación"] = <MemberAsignacionScreen />;
     screens["Calendario Miembro"] = <MemberCalendarioScreen />;
     screens["Deberes"] = <MemberDeberesScreen />;
-    screens["Cerrar Sesión"] = <HomeScreen />;
   }
 
-  const tabKeys = Object.keys(screens);
+  let tabKeys = Object.keys(screens);
+
+  // Build a full screens collection (allScreens) so hidden routes remain navigable
+  // while we render a curated set of bottom tabs to avoid visual overload.
+  const allScreens = {
+    ...screens,
+    Candidatos: <ElectorCandidatosScreen />,
+    Calendarios: <SharedCalendarioScreen />,
+    Partidos: <SharedPartidosScreen />,
+    Verificar: <VerificarScreen navigation={navigation} />,
+  };
+
+  if (role === "elector") {
+    const ElectorInicioScreen = require("../screens/ElectorInicioScreen").default;
+    allScreens["Mi Voto"] = <ElectorInicioScreen />;
+  }
+
+  if (role === "member") {
+    const MemberInicioScreen = require("../screens/MemberInicioScreen").default;
+    const MemberAsignacionScreen = require("../screens/MemberAsignacionScreen").default;
+    const MemberCalendarioScreen = require("../screens/MemberCalendarioScreen").default;
+    const MemberDeberesScreen = require("../screens/MemberDeberesScreen").default;
+
+    allScreens["Inicio Miembro"] = <MemberInicioScreen />;
+    allScreens["Asignación"] = <MemberAsignacionScreen />;
+    allScreens["Calendario Miembro"] = <MemberCalendarioScreen />;
+    allScreens["Deberes"] = <MemberDeberesScreen />;
+  }
+
+  const allKeys = Object.keys(allScreens);
+  // Use allKeys for the paging ScrollView; bottom tabs will be a filtered view
+  tabKeys = allKeys;
   const activeIndex = tabKeys.indexOf(activeTab);
 
   const handleScroll = (event) => {
@@ -130,8 +157,17 @@ export default function MainTabs({ navigation, route }) {
 
   const scrollToTab = (index) => {
     scrollRef.current?.scrollTo({ x: index * screenWidth, animated: true });
-    setActiveTab(tabKeys[index]);
+    setActiveTab(allKeys[index]);
   };
+
+  // If a specific tab is requested via route params, switch to it
+  React.useEffect(() => {
+    const requestedTab = route?.params?.activeTab;
+    if (requestedTab && allKeys.includes(requestedTab)) {
+      const idx = allKeys.indexOf(requestedTab);
+      scrollToTab(idx);
+    }
+  }, [route?.params?.activeTab]);
 
   return (
     <View style={styles.container}>
@@ -144,9 +180,9 @@ export default function MainTabs({ navigation, route }) {
         showsHorizontalScrollIndicator={false}
         style={styles.screenWrapper}
       >
-        {tabKeys.map((key) => (
+        {allKeys.map((key) => (
           <View key={key} style={{ width: screenWidth }}>
-            {screens[key]}
+            {allScreens[key]}
           </View>
         ))}
       </ScrollView>
@@ -158,27 +194,34 @@ export default function MainTabs({ navigation, route }) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.tabScroll}
         >
-          {tabKeys.map((tab, index) => (
-            <TouchableOpacity
-              key={tab}
-              style={[
-                styles.tabButton,
-                activeTab === tab && { backgroundColor: colors.redPrimary },
-              ]}
-              onPress={() => {
-                if (tab === "Cerrar Sesión") {
-                  Alert.alert("Cerrar sesión", "¿Desea cerrar sesión?", [
-                    { text: "Cancelar", style: "cancel" },
-                    { text: "Sí", onPress: () => navigation.replace("MainTabs") },
-                  ]);
-                  return;
-                }
-                scrollToTab(index);
-              }}
-            >
-              {getTabIcon(tab, activeTab === tab)}
-            </TouchableOpacity>
-          ))}
+          {(() => {
+            const hiddenInBottom = ["Candidatos", "Calendarios", "Partidos", "Verificar"];
+            const bottomKeys = allKeys.filter((k) => !hiddenInBottom.includes(k));
+            return bottomKeys.map((tab) => {
+              const idx = allKeys.indexOf(tab);
+              return (
+                <TouchableOpacity
+                  key={tab}
+                  style={[
+                    styles.tabButton,
+                    activeTab === tab && { backgroundColor: colors.redPrimary },
+                  ]}
+                  onPress={() => {
+                    if (tab === "Cerrar Sesión") {
+                      Alert.alert("Cerrar sesión", "¿Desea cerrar sesión?", [
+                        { text: "Cancelar", style: "cancel" },
+                        { text: "Sí", onPress: () => navigation.replace("MainTabs") },
+                      ]);
+                      return;
+                    }
+                    if (idx !== -1) scrollToTab(idx);
+                  }}
+                >
+                  {getTabIcon(tab, activeTab === tab)}
+                </TouchableOpacity>
+              );
+            });
+          })()}
         </ScrollView>
       </View>
     </View>

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import LogoutButton from "../components/LogoutButton";
 
 // Color Palette
 const colors = {
@@ -93,7 +94,7 @@ export default function HomeScreen({ navigation, onTabSwitch }) {
 
   const handleVerifyPress = () => {
     if (navigation) {
-      navigation.navigate("Verificar");
+      navigation.navigate("VerificarScreen");
     }
   };
 
@@ -105,6 +106,8 @@ export default function HomeScreen({ navigation, onTabSwitch }) {
   };
 
   return (
+    <View style={{ flex: 1 }}>
+      <LogoutButton navigation={navigation} />
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
@@ -202,6 +205,7 @@ export default function HomeScreen({ navigation, onTabSwitch }) {
       {/* Spacer for bottom nav */}
       <View style={styles.spacer} />
     </ScrollView>
+        </View>
   );
 }
 

@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
+import LogoutButton from "../components/LogoutButton";
 
 const colors = {
     redPrimary: '#D70000',
@@ -9,10 +10,12 @@ const colors = {
     grayBackground: '#F0F2F5',
 };
 
-export default function MemberInicioScreen() {
+export default function MemberInicioScreen({navigation}) {
   const name = "Ana Laura Chávez Pérez";
   
   return (
+    <View style={{ flex: 1, position: "relative" }}>
+      <LogoutButton navigation={navigation} />
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>¡Bienvenido(a), {name}!</Text>
@@ -46,6 +49,7 @@ export default function MemberInicioScreen() {
         Tu compromiso garantiza un proceso transparente y ordenado.
       </Text>
     </ScrollView>
+    </View>
   );
 }
 
