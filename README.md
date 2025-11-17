@@ -199,3 +199,11 @@ El proyecto utiliza los comandos estándar de Expo definidos en `package.json`:
     ```bash
     npm run web
     ```
+
+## Despliegue en EXPO
+
+Se realizo un despliegue en expo con perfil de Android en forma de APK ejecutable:
+```bash
+https://expo.dev/accounts/cbelmer28/projects/Frontend-Hackaton/builds/a4a536ce-1ac6-4021-8aed-a8639e0e6f60
+```
+
